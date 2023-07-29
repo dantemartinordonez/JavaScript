@@ -1,54 +1,109 @@
-alert("Bienvenidos para comenzar vamos a corroborar tu mayoria de edad");
-let edad = parseInt(prompt("Ingrese su edad"));
-let edadMinima = 18;
-if (edad >= edadMinima) {
-  alert("Bienvenido puede ingresar");
-} else if (edad <= edadMinima) {
-  alert("No cumple con la edad mínima para ingresar");
-  alert(actualizar) 
-}function compra(){
-  alert("Bienvenido a nuestra página de bebidas. Podrás realizar tus compras aquí.");
-  alert("Una vez que hayas terminado de elegir tus productos, ingresa la palabra TERMINAR para darte el total de tu compra. Gracias por elegirnos!");
-    let next = prompt("¿Quieres realizar una compra? \n - coloque SI para empezar a comprar nuestros vinos exclusivos \n - coloque NO para cerrar este mensaje");
-  if(next === "SI" || next==="si"){
-    let producto = "";
-    let listaProductos = "";
-    let totalCompra = 0;
-    let actualizar = "Si quieres realizar una compra, actualiza la página. Gracias por visitarnos!";
-    let actualizar2 = "Si quieres volver a realizar una compra, actualiza la página. Gracias por visitarnos!";
-    while (producto!="TERMINAR"){
-      producto = prompt("Ingrese un Código del 1-5 para elegir sus productos. TERMINAR para finalizar \n 1: LUIGI BOSCA MALBEC 750ML - $3200\n 2: TRUMPETER MALBEC 750ML - $2400\n 3: KILKA MALBEC 750ml - $ 2100 \n 4: PISPI MALBEC 750ML - $2800 \n 5: LUIGI BOSCA CHARDONNAY 750ML - $4200"); 
-      switch (producto){
-        case "1":
-          totalCompra += 3200;
-          break;
-        case "2":
-          totalCompra += 2400;
-          break;
-        case "3":
-          totalCompra += 2100;
-          break;
-        case "4":
-          totalCompra += 2800;
-          break;
-        case "5":
-          totalCompra += 4200;
-          break;
-        case "TERMINAR":
-          alert ("COMPRA FINALIZADA. PRECIONE ACEPTAR PARA CONTINUAR.");
-          break;
-        default:
-          alert ("El código ingresado no existe");
-      }
-    }
-    if (totalCompra == 0){
-      alert('No hay productos en su carrito');
-      alert(actualizar);
-    }else{
-      alert("El total de la compra es: $"+totalCompra+" "+actualizar2);
-    }
-  } else {
-    alert("Si quieres realizar una compra, actualiza la página. Gracias por visitarnos!");
+alert("bienvenido a control de sotok de vehiculos 0km Multi-car")
+
+const calcularPromedio = (numeros) => {
+  if (numeros.length === 0) {
+    return 0;
   }
+
+  let suma = 0;
+  for (const numero of numeros) {
+    suma += numero;
+  }
+  return suma / numeros.length;
+};
+
+// Array de autos y stocjk dispionibles
+const autos = [
+  { marca: 'Peugeot', modelo: '208', stock: 5, precio: 9000000 },
+  { marca: 'Fiat', modelo: 'Cronos', stock: 3, precio: 8500000 },
+  { marca: 'Ford', modelo: 'Focus', stock: 7, precio: 12000000 },
+  { marca: 'Fiat', modelo: 'Argo', stock: 8, precio: 8000000 },
+];
+
+//Funcion para mostrar el precio y stock de autos disponibles en la concesionaria
+const mostrarStockYPrecio = () => {
+  let mensaje = 'Stock y precio de autos:\n';
+  autos.forEach((auto) => {
+    mensaje += `${auto.marca} ${auto.modelo}: ${auto.stock} unidades - Precio: $${auto.precio}\n`;
+  });
+  alert(mensaje);
+};
+//agregar vehículos al stock
+const agregarVehiculos = () => {
+  const marca = prompt('Ingrese la marca del nuevo auto a ingresar:');
+  const modelo = prompt('Ingrese el tipo de modelo del vehiculo:');
+  const cantidad = parseInt(prompt('coloque la cantidad de vehiculos que ingresan al stock:'));
+
+  let autoEncontrado = false;
+  for (let i = 0; i < autos.length; i++) {
+    if (autos[i].marca.toLowerCase() === marca.toLowerCase() && autos[i].modelo.toLowerCase() === modelo.toLowerCase()) {
+      autos[i].stock += cantidad;
+      autoEncontrado = true;
+      break;
+    }
+  }
+
+  if (!autoEncontrado) {
+    const precio = parseFloat(prompt('Ingrese el precio del vehiculo:'));
+    autos.push({ marca, modelo, stock: cantidad, precio });
+  }
+
+  alert(`Se han agregado ${cantidad} unidades de ${marca} ${modelo} al stock.`);
+};
+
+//quitar vehículos del stock
+const quitarVehiculos = () => {
+  const marca = prompt('Ingrese la marca del vehículo a quitar del stock:');
+  const modelo = prompt('Ingrese el modelo del vehículo a quitar del stock:');
+  const cantidad = parseInt(prompt('Ingrese la cantidad de unidades que desea quitar:'));
+
+  let autoEncontrado = false;
+  for (let i = 0; i < autos.length; i++) {
+    if (autos[i].marca.toLowerCase() === marca.toLowerCase() && autos[i].modelo.toLowerCase() === modelo.toLowerCase()) {
+      if (autos[i].stock >= cantidad) {
+        autos[i].stock -= cantidad;
+        autoEncontrado = true;
+        alert(`Se han quitado ${cantidad} unidades de ${marca} ${modelo} del stock.`);
+      } else {
+        alert(`No se pueden quitar ${cantidad} unidades de ${marca} ${modelo} porque no hay suficiente stock.`);
+      }
+      break;
+    }
+  }
+
+  if (!autoEncontrado) {
+    alert(`El vehículo ${marca} ${modelo} no se encuentra en el stock.`);
+  }
+};
+
+//stock y preco
+mostrarStockYPrecio();
+
+// hacemos un ciclo para que el operario pueda salir de la funcion
+let continuar = true;
+while (continuar) {
+  const opcion = prompt('¿Desea agregar vehículos o quitar vehículos del stock? (agregar/quitar/salir)').toLowerCase();
+
+  switch (opcion) {
+    case 1: ('agregar')
+      agregarVehiculos();
+      break;
+    case 2: ('quitar')
+      quitarVehiculos();
+      break;
+    case 3: ('salir')
+      continuar = false;
+      break;
+    default:
+      alert('Opción no válida. Por favor, seleccione "agregar", "quitar" o "salir".');
+  }
+
+  // Mostramos el stock y precio actualizado
+  mostrarStockYPrecio();
 }
-compra();
+
+let totalStock = 0;
+for (let i = 0; i < autos.length; i++) {
+  totalStock += autos[i].stock;
+}
+console.log(`El total de productos en stock es: ${totalStock} unidades.`);

@@ -82,20 +82,20 @@ mostrarStockYPrecio();
 // hacemos un ciclo para que el operario pueda salir de la funcion
 let continuar = true;
 while (continuar) {
-  const opcion = prompt('¿Desea agregar vehículos o quitar vehículos del stock? (agregar/quitar/salir)').toLowerCase();
+  const opcion = prompt('Escriba la accion deseea realizar:\n1 - Agregar \n2 - Quitar \n3 - Salir').toLowerCase();
 
   switch (opcion) {
-    case 1: ('agregar')
+    case 'agregar':
       agregarVehiculos();
       break;
-    case 2: ('quitar')
+    case 'quitar':
       quitarVehiculos();
       break;
-    case 3: ('salir')
+    case 'salir':
       continuar = false;
       break;
     default:
-      alert('Opción no válida. Por favor, seleccione "agregar", "quitar" o "salir".');
+      alert('Opción no válida. Por favor, escriba "agregar", "quitar" o "salir".');
   }
 
   // Mostramos el stock y precio actualizado

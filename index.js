@@ -1,8 +1,3 @@
-//un simulador para un empleado de una concesionaria de automores multimarcas 0km donde puede agregar quitar o cambiar precios de los vehiculos.
-alert("Bienvenido a Control de Stock de Vehículos 0km Multi-car");
-
-
-
 class Vehiculo {
   constructor(marca, modelo, stock, precio) {
     this.marca = marca;
@@ -12,117 +7,224 @@ class Vehiculo {
   }
 }
 
+const autos = [];
+// aca tenemos un listado vehiculos con su imagen dependiendo de la marca que carguemos del vehiculo.
+//la idea es poder hacer un listado de los mas comunes por marca y modelo.
+const marcasImagenes = {
+  peugeot: 'peugeot.jfif',
+  toyota: 'toyota.jfif',
+  fiat: 'fiat.jfif',
+  citroen: 'citroen.jfif',
+  ford: 'ford.jfif',
+  volkswagen: 'volkswagen.jfif',
+};
 
+const mostrarVehiculos = () => {
+  const vehiculosContenedor = document.getElementById('vehiculosContenedor');
+  vehiculosContenedor.innerHTML = '';
 
-// Array de autos disponibles con stock y precios 
-const autos = [
-  new Vehiculo('Peugeot', '208', 5, 9000000),
-  new Vehiculo('Fiat', 'Cronos', 3, 8500000),
-  new Vehiculo('Ford', 'Focus', 7, 12000000),
-  new Vehiculo('Fiat', 'Argo', 8, 8000000),
-];
+//en caso que el empleado coloque una marca que no se encuentre en el listado se cargara una imagen de un auto generico.
+  autos.forEach((auto, index) => {
+    const imagenMarca = marcasImagenes[auto.marca.toLowerCase()];
+    const imagenSrc = imagenMarca ? `assets/${imagenMarca}` : 'assets/autoComun.jfif';
 
+    const vehiculoCard = document.createElement('div');
+    vehiculoCard.className = 'vehiculo-card';
+    vehiculoCard.innerHTML = `
+      <div class="vehiculo-image">
+        <img src="${imagenSrc}" alt="Imagen de ${auto.marca}" width="200" height="300">
+      </div>
+      <h2>${auto.marca.toUpperCase()} ${auto.modelo}</h2>
+      <p>Stock: ${auto.stock} unidades</p>
+      <p>Precio: $${auto.precio}</p>
+      <button class="editar-btn" data-index="${index}">Editar</button>
+      <button class="eliminar-btn" data-index="${index}">Eliminar</button>
+    `;
 
+    vehiculosContenedor.appendChild(vehiculoCard);
 
+    const editarBtn = vehiculoCard.querySelector('.editar-btn');
+    editarBtn.addEventListener('click', () => editarVehiculo(index));
 
-const mostrarAutosDisponibles = () => {
-  let mensaje = 'MARCA, MODELO, STOCK Y PRECIOS DE AUTOS DISPONIBLES:\n';
-  autos.forEach((auto) => {
-    mensaje += `${auto.marca} ${auto.modelo}: ${auto.stock} unidades - Precio: $${auto.precio}\n`;
+    const eliminarBtn = vehiculoCard.querySelector('.eliminar-btn');
+    eliminarBtn.addEventListener('click', () => eliminarVehiculo(index));
   });
-  alert(mensaje);
 };
 
-// encontrar vehículo en el array autos por marca y modelo
-const encontrarIndiceVehiculo = (marca, modelo) => {
-  return autos.findIndex(
-    (auto) => auto.marca.toLowerCase() === marca.toLowerCase() && auto.modelo.toLowerCase() === modelo.toLowerCase()
-  );
+const guardarAutosEnLocalStorage = () => {
+  localStorage.setItem('autos', JSON.stringify(autos));
 };
 
-
-
-// agregar autos al stock
-const agregarVehiculos = () => {
-  const marca = prompt('Ingrese la marca del nuevo vehiculo a ingresar:');
-  const modelo = prompt('Ingrese el tipo de modelo del vehiculo:');
-  const cantidad = parseInt(prompt('Coloque la cantidad de vehiculos que ingresan al stock:'), 10);
-
-  const indiceVehiculo = encontrarIndiceVehiculo(marca, modelo);
-  if (indiceVehiculo !== -1) {
-    autos[indiceVehiculo].stock += cantidad;
-    alert(`Se han agregado ${cantidad} unidades de ${marca} ${modelo} al stock.`);
-  } else {
-    const precio = parseFloat(prompt('Ingrese el precio del vehículo:'));
-    autos.push(new Vehiculo(marca, modelo, cantidad, precio));
-    alert(`Se han agregado ${cantidad} unidades de ${marca} ${modelo} al stock.`);
+const cargarAutosDesdeLocalStorage = () => {
+  const autosGuardados = JSON.parse(localStorage.getItem('autos'));
+  if (autosGuardados) {
+    autos.length = 0;
+    autosGuardados.forEach(auto => {
+      autos.push(new Vehiculo(auto.marca, auto.modelo, auto.stock, auto.precio));
+    });
+    mostrarVehiculos();
   }
 };
-// quitar vehículos del stock
-const quitarVehiculos = () => {
-  const marca = prompt('Ingrese la marca del vehiculo a quitar del stock:');
-  const modelo = prompt('Ingrese el modelo del vehiculo a quitar del stock:');
-  const cantidad = parseInt(prompt('Ingrese la cantidad de unidades que desea quitar:'), 10);
 
-  const indiceVehiculo = encontrarIndiceVehiculo(marca, modelo);
-  if (indiceVehiculo !== -1) {
-    if (autos[indiceVehiculo].stock >= cantidad) {
-      autos[indiceVehiculo].stock -= cantidad;
-      alert(`Se han quitado ${cantidad} unidades de ${marca} ${modelo} del stock.`);
-    } else {
-      alert(`No se pueden quitar ${cantidad} unidades de ${marca} ${modelo} porque no hay suficiente stock.`);
+const agregarVehiculo = (marca, modelo, stock, precio) => {
+  const nuevoVehiculo = new Vehiculo(marca, modelo, stock, precio);
+  autos.push(nuevoVehiculo);
+  guardarAutosEnLocalStorage();
+  mostrarVehiculos();
+
+  const loggedInUser = sessionStorage.getItem('loggedInUser');
+  const actionMessage = `Usuario ${loggedInUser} agregó un vehículo: ${marca} ${modelo}`;
+  actualizarRegistroAcciones(actionMessage);
+};
+
+// vamos a poner dos tipos de opciones para modificar los datos cargados del vehuculo. 
+//la idea luego es que el usuario pueda modificar color y año de fabricacion
+
+const editarVehiculo = (index) => {
+  const vehiculo = autos[index];
+  const editarForm = document.createElement('div');
+  editarForm.className = 'editar-form';
+  editarForm.innerHTML = `
+    <label for="nuevoPrecio">Nuevo Precio:</label>
+    <input type="number" id="nuevoPrecio" step="0.01" value="${vehiculo.precio}">
+    <label for="nuevoStock">Nuevo Stock:</label>
+    <input type="number" id="nuevoStock" value="${vehiculo.stock}">
+    <button class="guardar-btn">Guardar</button>
+    <button class="cancelar-btn">Cancelar</button>
+  `;
+
+  editarForm.querySelector('.guardar-btn').addEventListener('click', () => {
+    const nuevoPrecio = parseFloat(editarForm.querySelector('#nuevoPrecio').value);
+    const nuevoStock = parseInt(editarForm.querySelector('#nuevoStock').value);
+
+    if (!isNaN(nuevoPrecio) && !isNaN(nuevoStock)) {
+      vehiculo.precio = nuevoPrecio;
+      vehiculo.stock = nuevoStock;
+      guardarAutosEnLocalStorage();
+      mostrarVehiculos();
+
+      const loggedInUser = sessionStorage.getItem('loggedInUser');
+      const actionMessage = `Usuario ${loggedInUser} editó un vehículo: ${vehiculo.marca} ${vehiculo.modelo}`;
+      actualizarRegistroAcciones(actionMessage);
     }
-  } else {
-    alert(`El vehículo ${marca} ${modelo} no se encuentra en el stock.`);
-  }
+  });
+
+  editarForm.querySelector('.cancelar-btn').addEventListener('click', () => {
+    editarForm.remove();
+  });
+
+  const vehiculoCard = document.querySelectorAll('.vehiculo-card')[index];
+  vehiculoCard.appendChild(editarForm);
 };
-// cambio de precio de un auto existente
-const cambiarPrecio = () => {
-  const marca = prompt('Ingrese la marca del vehiculo para cambiar el precio:');
-  const modelo = prompt('Ingrese el modelo del vehiculo para cambiar el precio:');
 
-  const indiceVehiculo = encontrarIndiceVehiculo(marca, modelo);
-  if (indiceVehiculo !== -1) {
-    const precioAnterior = autos[indiceVehiculo].precio;
-    alert(`El precio actual de ${marca} ${modelo} es: $${precioAnterior}`);
-    
-    const nuevoPrecio = parseFloat(prompt('Ingrese el nuevo precio del vehiculo:'));
-    autos[indiceVehiculo].precio = nuevoPrecio;
-    alert(`El precio de ${marca} ${modelo} ha sido actualizado a $${nuevoPrecio}.`);
-  } else {
-    alert(`El vehiculo ${marca} ${modelo} no se encuentra en el stock.`);
-  }
+const eliminarVehiculo = (index) => {
+  autos.splice(index, 1);
+  guardarAutosEnLocalStorage();
+  mostrarVehiculos();
+
+  const loggedInUser = sessionStorage.getItem('loggedInUser');
+  const actionMessage = `Usuario ${loggedInUser} eliminó un vehículo.`;
+  actualizarRegistroAcciones(actionMessage);
 };
-mostrarAutosDisponibles();
-// opciones para el usuario
-let continuar = true;
-while (continuar) {
-  const opcion = prompt('Escriba la acción que desea realizar:\n1 - Agregar vehiculo \n2 - Quitar vehiculo \n3 - Cambiar Precio \n4 - Salir').toLowerCase();
 
-  switch (opcion) {
-    case '1':
-    case 'agregar':
-      agregarVehiculos();
-      break;
-    case '2':
-    case 'quitar':
-      quitarVehiculos();
-      break;
-    case '3':
-    case 'cambiar precio':
-      cambiarPrecio();
-      break;
-    case '4':
-    case 'salir':
-      continuar = false;
-      break;
-    default:
-      alert('Opción no valida. Por favor, coloque la opcion numerica del 1 al 4');
+// vamos a mostrar el regisro de acciones de cada persona que se logea. para que sepa que accion realizo
+//idea a futuro es que se pueda ver en el registro la modificacion lo mas especifica posible. pude sacar algunas ideas de internet
+
+const mostrarRegistroAcciones = () => {
+  const actionLog = document.getElementById('actionLog');
+  actionLog.innerHTML = ''; 
+
+  const registros = JSON.parse(localStorage.getItem('registroAcciones')) || [];
+
+  let currentUser = '';
+  registros.forEach(registro => {
+    const parts = registro.split(':');
+    const username = parts[0].trim(); 
+    const action = parts[1].trim(); 
+
+    if (currentUser !== username) {
+      const userHeader = document.createElement('p');
+      userHeader.textContent = `Usuario ${username}:`;
+      actionLog.appendChild(userHeader);
+      currentUser = username;
+    }
+
+    const registroItem = document.createElement('p');
+    registroItem.textContent = `  - ${action}`;
+    actionLog.appendChild(registroItem);
+  });
+};
+
+const actualizarRegistroAcciones = (message) => {
+  const loggedInUser = sessionStorage.getItem('loggedInUser');
+  const timestamp = new Date().toLocaleString();
+  const registro = `${loggedInUser}: ${message}`;
+
+  const registros = JSON.parse(localStorage.getItem('registroAcciones')) || [];
+  registros.push(registro);
+  localStorage.setItem('registroAcciones', JSON.stringify(registros));
+
+  mostrarRegistroAcciones(); 
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  const logoutButton = document.getElementById('logoutButton');
+  const vehiculosSection = document.getElementById('vehiculosSection');
+  const addVehicleForm = document.getElementById('addVehicleForm');
+  const actionLog = document.getElementById('actionLog');
+
+  const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+
+  if (isLoggedIn === 'true') {
+    loginForm.style.display = 'none';
+    logoutButton.style.display = 'block';
+    vehiculosSection.style.display = 'block';
+    cargarAutosDesdeLocalStorage();
+  } else {
+    loginForm.style.display = 'block';
+    logoutButton.style.display = 'none';
+    vehiculosSection.style.display = 'none';
   }
 
-  mostrarAutosDisponibles();
-}
+  logoutButton.addEventListener('click', () => {
+    sessionStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('loggedInUser');
+    loginForm.style.display = 'block';
+    logoutButton.style.display = 'none';
+    vehiculosSection.style.display = 'none';
+  });
 
-// console.log del total del stock del total de los autos en la concesionaria
-const totalStock = autos.reduce((total, auto) => total + auto.stock, 0);
-console.log(`El total de autos en stock es: ${totalStock} unidades.`);
+  loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+// Supongamos que las credenciales son correctas dejamos ingresar a l formulario
+    sessionStorage.setItem('isLoggedIn', 'true');
+    sessionStorage.setItem('loggedInUser', email);
+
+    loginForm.style.display = 'none';
+    logoutButton.style.display = 'block';
+    vehiculosSection.style.display = 'block';
+    cargarAutosDesdeLocalStorage();
+  });
+
+  addVehicleForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+
+    if (isLoggedIn === 'true') {
+      const marca = document.getElementById('marca').value;
+      const modelo = document.getElementById('modelo').value;
+      const stock = parseInt(document.getElementById('stock').value);
+      const precio = parseFloat(document.getElementById('precio').value);
+
+      agregarVehiculo(marca, modelo, stock, precio);
+      addVehicleForm.reset();
+    } else {
+      console.log('Usuario no autorizado. Por favor, inicie sesión.');
+    }
+  });
+
+  mostrarRegistroAcciones();
+});

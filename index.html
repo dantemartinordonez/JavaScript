@@ -1,41 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/style.css">
+  <title>Gestión de Vehículos</title>
 </head>
 <body>
-<!-- se coloca 4 cards con imagen y precio de los vehiculos que tendria la concesionaria donde a futuro interactue con js -->
-    <header>
-        <img class="logo" src="./assets/Multi-Car-Automotores-concesionario.jpg" alt="">
-    </header>
-    <h1>concesionaria Multi-Car</h1>
-<main>
-    <div class="card">
-        <h2>Peugeot 208</h2>
-        <img src="./assets/descarga.jfif" alt="Imagen del Producto">            
-        <p>Precio: $9000000</p>
+  <header>
+    <div class="header-content">
+      <img class="logo" src="./assets/Multi-Car-Automotores-concesionario.jpg" alt="logo de empresa">
+      <div id="userOptions">
+      <form id="loginForm">
+        <h3>GESTION DE EMPLEADOS</h3>
+        <label for="email">Correo Electrónico:</label>
+        <div class="user-input">
+          <input type="text" id="email" required>
+        </div>
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" required pattern="^\d{6}$" title="La contraseña debe tener 6 dígitos">
+        <button type="submit">Iniciar Sesión</button>
+      </form>
+      <button id="logoutButton" style="display: none;">Cerrar Sesión</button>
     </div>
-
-    <div class="card2">
-        <h2>Fiat Cronos</h2>
-        <img src="./assets/images.jfif" alt="Imagen del Producto">            
-        <p>Precio: $8500000</p>
+  </header>
+  <main id="vehiculosSection" class="hidden">
+    <h1>Gestión de Vehículos</h1>
+    <form id="addVehicleForm">
+      <label for="marca">Marca:</label>
+      <input type="text" id="marca" required>
+      <label for="modelo">Modelo:</label>
+      <input type="text" id="modelo" required>
+      <label for="stock">Stock:</label>
+      <input type="number" id="stock" required>
+      <label for="precio">Precio:</label>
+      <input type="number" id="precio" step="0.01" required>
+      <button type="submit">Agregar Vehículo</button>
+    </form>
+    <div id="vehiculosContenedor">
     </div>
-    <div class="card3">
-        <h2>Ford Focus</h2>
-        <img src="./assets/descarga (3).jfif" alt="Imagen del Producto">            
-        <p>Precio: $12000000</p>
+    <div id="actionLog">
     </div>
-    <div class="card4">
-        <h2>Fiat Argo</h2>
-        <img src="./assets/descarga (2).jfif" alt="Imagen del Producto">            
-        <p>Precio: $8000000</p>
-    </div>
-</main>
-    <script src="./index.js"></script>  
-
+  </main>
+  <script src="./index.js"></script>
 </body>
 </html>

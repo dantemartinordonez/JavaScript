@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="./css/style.css">
   <title>Gestión de Vehículos</title>
 </head>
@@ -11,17 +12,18 @@
     <div class="header-content">
       <img class="logo" src="./assets/Multi-Car-Automotores-concesionario.jpg" alt="logo de empresa">
       <div id="userOptions">
-      <form id="loginForm">
-        <h3>GESTION DE EMPLEADOS</h3>
-        <label for="email">Correo Electrónico:</label>
-        <div class="user-input">
-          <input type="text" id="email" required>
-        </div>
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" required pattern="^\d{6}$" title="La contraseña debe tener 6 dígitos">
-        <button type="submit">Iniciar Sesión</button>
-      </form>
-      <button id="logoutButton" style="display: none;">Cerrar Sesión</button>
+        <form id="loginForm">
+          <h3>GESTION DE EMPLEADOS</h3>
+          <label for="email">Correo Electrónico:</label>
+          <div class="user-input">
+            <input type="text" id="email" required>
+          </div>
+          <label for="password">Contraseña:</label>
+          <input type="password" id="password" required pattern="^\d{6}$" title="La contraseña debe tener 6 dígitos">
+          <button type="submit">Iniciar Sesión</button>
+        </form>
+        <button id="logoutButton" style="display: none;">Cerrar Sesión</button>
+      </div>
     </div>
   </header>
   <main id="vehiculosSection" class="hidden">
@@ -39,9 +41,21 @@
     </form>
     <div id="vehiculosContenedor">
     </div>
-    <div id="actionLog">
-    </div>
+    <br>
+  
+    <table>
+      <h4>DATOS CARGADOS POR EL USUARIO</h4>
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="actionLogTableBody">
+      </tbody>
+    </table>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="./index.js"></script>
 </body>
 </html>

@@ -1,0 +1,20 @@
+[
+  {
+    "marca": "Peugeot",
+    "modelo": "208",
+    "stock": 5,
+    "precio": 9500000
+  },
+  {
+    "marca": "Fiat",
+    "modelo": "Cronos",
+    "stock": 3,
+    "precio": 8200000
+  },
+  {
+    "marca": "Ford",
+    "modelo": "Focus",
+    "stock": 1,
+    "precio": 12000000
+  }
+]

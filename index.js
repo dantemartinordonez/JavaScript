@@ -1,173 +1,202 @@
-class Vehiculo {
-  constructor(marca, modelo, stock, precio) {
-    this.marca = marca;
-    this.modelo = modelo;
-    this.stock = stock;
-    this.precio = precio;
+document.addEventListener('DOMContentLoaded', async () => {
+  let autos = []; // Lista para almacenar los vehículos
+
+  const cargarDatosDesdeJSON = async () => {
+    try {
+      const response = await fetch("./db/autos.json");
+      const data = await response.json();
+      autos = data; // Cargamos los datos del JSON
+      mostrarVehiculos();
+    } catch (error) {
+      console.error('Error al cargar datos desde JSON:', error);
+    }
+  };
+
+  cargarDatosDesdeJSON(); // Cargamos los datos desde el JSON al iniciar
+
+  const guardarDatosEnJSON = async () => {
+    try {
+      const response = await fetch("./db/autos.json", {
+        method: 'PUT', // Usar PUT para actualizar el JSON
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(autos), // Guardamos los datos actualizados en el JSON
+      });
+
+      if (response.ok) {
+        console.log('Datos guardados en el JSON exitosamente.');
+      } else {
+        console.error('Error al guardar datos en el JSON.');
+      }
+    } catch (error) {
+      console.error('Error al guardar datos en el JSON:', error);
+    }
+  };
+
+  const marcasImagenes = {
+    peugeot: 'peugeot.jfif',
+    toyota: 'toyota.jfif',
+    fiat: 'fiat.jfif',
+    citroen: 'citroen.jfif',
+    ford: 'ford.jfif',
+    volkswagen: 'volkswagen.jfif',
+  };
+
+  class Vehiculo {
+    constructor(marca, modelo, stock, precio) {
+      this.marca = marca;
+      this.modelo = modelo;
+      this.stock = stock;
+      this.precio = precio;
+    }
   }
-}
 
-const autos = [];
-// aca tenemos un listado vehiculos con su imagen dependiendo de la marca que carguemos del vehiculo.
-//la idea es poder hacer un listado de los mas comunes por marca y modelo.
-const marcasImagenes = {
-  peugeot: 'peugeot.jfif',
-  toyota: 'toyota.jfif',
-  fiat: 'fiat.jfif',
-  citroen: 'citroen.jfif',
-  ford: 'ford.jfif',
-  volkswagen: 'volkswagen.jfif',
-};
+  const mostrarVehiculos = () => {
+    const vehiculosContenedor = document.getElementById('vehiculosContenedor');
+    vehiculosContenedor.innerHTML = '';
 
-const mostrarVehiculos = () => {
-  const vehiculosContenedor = document.getElementById('vehiculosContenedor');
-  vehiculosContenedor.innerHTML = '';
+    autos.forEach((auto, index) => {
+      const imagenMarca = marcasImagenes[auto.marca.toLowerCase()];
+      const imagenSrc = imagenMarca ? `assets/${imagenMarca}` : 'assets/autoComun.jfif';
 
-//en caso que el empleado coloque una marca que no se encuentre en el listado se cargara una imagen de un auto generico.
-  autos.forEach((auto, index) => {
-    const imagenMarca = marcasImagenes[auto.marca.toLowerCase()];
-    const imagenSrc = imagenMarca ? `assets/${imagenMarca}` : 'assets/autoComun.jfif';
+      const vehiculoCard = document.createElement('div');
+      vehiculoCard.className = 'vehiculo-card';
+      vehiculoCard.innerHTML = `
+        <div class="vehiculo-image">
+          <img src="${imagenSrc}" alt="Imagen de ${auto.marca}" width="200" height="300">
+        </div>
+        <h2>${auto.marca.toUpperCase()} ${auto.modelo}</h2>
+        <p>Stock: ${auto.stock} unidades</p>
+        <p>Precio: $${auto.precio}</p>
+        <button class="editar-btn" data-index="${index}">Editar</button>
+        <button class="eliminar-btn" data-index="${index}">Eliminar</button>
+      `;
 
-    const vehiculoCard = document.createElement('div');
-    vehiculoCard.className = 'vehiculo-card';
-    vehiculoCard.innerHTML = `
-      <div class="vehiculo-image">
-        <img src="${imagenSrc}" alt="Imagen de ${auto.marca}" width="200" height="300">
-      </div>
-      <h2>${auto.marca.toUpperCase()} ${auto.modelo}</h2>
-      <p>Stock: ${auto.stock} unidades</p>
-      <p>Precio: $${auto.precio}</p>
-      <button class="editar-btn" data-index="${index}">Editar</button>
-      <button class="eliminar-btn" data-index="${index}">Eliminar</button>
+      vehiculosContenedor.appendChild(vehiculoCard);
+
+      const editarBtn = vehiculoCard.querySelector('.editar-btn');
+      editarBtn.addEventListener('click', () => editarVehiculo(index));
+
+      const eliminarBtn = vehiculoCard.querySelector('.eliminar-btn');
+      eliminarBtn.addEventListener('click', () => eliminarVehiculo(index));
+    });
+  };
+
+  const agregarVehiculo = (marca, modelo, stock, precio) => {
+    const nuevoVehiculo = new Vehiculo(marca, modelo, stock, precio);
+    autos.push(nuevoVehiculo);
+    guardarDatosEnJSON(); // Guardar datos actualizados en el JSON
+    mostrarVehiculos();
+
+    const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+    const actionMessage = `Usuario ${loggedInUser} agregó un vehículo: ${marca} ${modelo}`;
+    actualizarRegistroAcciones(actionMessage);
+  };
+
+  const editarVehiculo = (index) => {
+    const vehiculo = autos[index];
+    const editarForm = document.createElement('div');
+    editarForm.className = 'editar-form';
+    editarForm.innerHTML = `
+      <label for="nuevoPrecio">Nuevo Precio:</label>
+      <input type="number" id="nuevoPrecio" step="0.01" value="${vehiculo.precio}">
+      <label for="nuevoStock">Nuevo Stock:</label>
+      <input type="number" id="nuevoStock" value="${vehiculo.stock}">
+      <button class="guardar-btn">Guardar</button>
+      <button class="cancelar-btn">Cancelar</button>
     `;
 
-    vehiculosContenedor.appendChild(vehiculoCard);
+    editarForm.querySelector('.guardar-btn').addEventListener('click', () => {
+      const nuevoPrecio = parseFloat(editarForm.querySelector('#nuevoPrecio').value);
+      const nuevoStock = parseInt(editarForm.querySelector('#nuevoStock').value);
 
-    const editarBtn = vehiculoCard.querySelector('.editar-btn');
-    editarBtn.addEventListener('click', () => editarVehiculo(index));
+      if (!isNaN(nuevoPrecio) && !isNaN(nuevoStock)) {
+        vehiculo.precio = nuevoPrecio;
+        vehiculo.stock = nuevoStock;
+        guardarDatosEnJSON(); // Guardar datos actualizados en el JSON
+        mostrarVehiculos();
 
-    const eliminarBtn = vehiculoCard.querySelector('.eliminar-btn');
-    eliminarBtn.addEventListener('click', () => eliminarVehiculo(index));
-  });
-};
-
-const guardarAutosEnLocalStorage = () => {
-  localStorage.setItem('autos', JSON.stringify(autos));
-};
-
-const cargarAutosDesdeLocalStorage = () => {
-  const autosGuardados = JSON.parse(localStorage.getItem('autos'));
-  if (autosGuardados) {
-    autos.length = 0;
-    autosGuardados.forEach(auto => {
-      autos.push(new Vehiculo(auto.marca, auto.modelo, auto.stock, auto.precio));
+        const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+        const actionMessage = `Usuario ${loggedInUser} editó un vehículo: ${vehiculo.marca} ${vehiculo.modelo}`;
+        actualizarRegistroAcciones(actionMessage);
+      }
     });
+
+    editarForm.querySelector('.cancelar-btn').addEventListener('click', () => {
+      editarForm.remove();
+    });
+
+    const vehiculoCard = document.querySelectorAll('.vehiculo-card')[index];
+    vehiculoCard.appendChild(editarForm);
+  };
+
+  const eliminarVehiculo = (index) => {
+    autos.splice(index, 1);
+    guardarDatosEnJSON(); // Guardar datos actualizados en el JSON
     mostrarVehiculos();
-  }
-};
 
-const agregarVehiculo = (marca, modelo, stock, precio) => {
-  const nuevoVehiculo = new Vehiculo(marca, modelo, stock, precio);
-  autos.push(nuevoVehiculo);
-  guardarAutosEnLocalStorage();
-  mostrarVehiculos();
+    const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+    const actionMessage = `Usuario ${loggedInUser} eliminó un vehículo.`;
+    actualizarRegistroAcciones(actionMessage);
+  };
 
-  const loggedInUser = sessionStorage.getItem('loggedInUser');
-  const actionMessage = `Usuario ${loggedInUser} agregó un vehículo: ${marca} ${modelo}`;
-  actualizarRegistroAcciones(actionMessage);
-};
+  const mostrarRegistroAcciones = () => {
+    const actionLogTableBody = document.getElementById('actionLogTableBody');
+    actionLogTableBody.innerHTML = '';
 
-// vamos a poner dos tipos de opciones para modificar los datos cargados del vehuculo. 
-//la idea luego es que el usuario pueda modificar color y año de fabricacion
+    const registros = JSON.parse(localStorage.getItem('registroAcciones')) || [];
 
-const editarVehiculo = (index) => {
-  const vehiculo = autos[index];
-  const editarForm = document.createElement('div');
-  editarForm.className = 'editar-form';
-  editarForm.innerHTML = `
-    <label for="nuevoPrecio">Nuevo Precio:</label>
-    <input type="number" id="nuevoPrecio" step="0.01" value="${vehiculo.precio}">
-    <label for="nuevoStock">Nuevo Stock:</label>
-    <input type="number" id="nuevoStock" value="${vehiculo.stock}">
-    <button class="guardar-btn">Guardar</button>
-    <button class="cancelar-btn">Cancelar</button>
-  `;
+    let currentUser = null;
+    registros.forEach(registro => {
+      const parts = registro.split(':');
+      const username = parts[0].trim();
+      const action = parts.slice(1).join(':').trim();
 
-  editarForm.querySelector('.guardar-btn').addEventListener('click', () => {
-    const nuevoPrecio = parseFloat(editarForm.querySelector('#nuevoPrecio').value);
-    const nuevoStock = parseInt(editarForm.querySelector('#nuevoStock').value);
+      if (currentUser !== username) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="clickable">${username}</td>
+          <td class="clickable" colspan="2">
+            <button class="toggle-details-btn">Mostrar detalles</button>
+            <div class="details hidden">
+              <ul class="user-actions"></ul>
+            </div>
+          </td>
+        `;
 
-    if (!isNaN(nuevoPrecio) && !isNaN(nuevoStock)) {
-      vehiculo.precio = nuevoPrecio;
-      vehiculo.stock = nuevoStock;
-      guardarAutosEnLocalStorage();
-      mostrarVehiculos();
+        actionLogTableBody.appendChild(row);
+        currentUser = username;
+      }
 
-      const loggedInUser = sessionStorage.getItem('loggedInUser');
-      const actionMessage = `Usuario ${loggedInUser} editó un vehículo: ${vehiculo.marca} ${vehiculo.modelo}`;
-      actualizarRegistroAcciones(actionMessage);
-    }
-  });
+      const userRow = actionLogTableBody.lastElementChild;
+      const userActionsList = userRow.querySelector('.user-actions');
+      const userDetails = userRow.querySelector('.details');
+      const toggleDetailsBtn = userRow.querySelector('.toggle-details-btn');
 
-  editarForm.querySelector('.cancelar-btn').addEventListener('click', () => {
-    editarForm.remove();
-  });
+      const actionItem = document.createElement('li');
+      actionItem.textContent = action;
+      userActionsList.appendChild(actionItem);
 
-  const vehiculoCard = document.querySelectorAll('.vehiculo-card')[index];
-  vehiculoCard.appendChild(editarForm);
-};
+      toggleDetailsBtn.addEventListener('click', () => {
+        userDetails.classList.toggle('hidden');
+        toggleDetailsBtn.textContent = userDetails.classList.contains('hidden') ? 'Mostrar detalles' : 'Ocultar detalles';
+      });
+    });
+  };
 
-const eliminarVehiculo = (index) => {
-  autos.splice(index, 1);
-  guardarAutosEnLocalStorage();
-  mostrarVehiculos();
+  const actualizarRegistroAcciones = (message) => {
+    const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+    const timestamp = new Date().toLocaleString();
+    const registro = `${loggedInUser}: ${message}`;
 
-  const loggedInUser = sessionStorage.getItem('loggedInUser');
-  const actionMessage = `Usuario ${loggedInUser} eliminó un vehículo.`;
-  actualizarRegistroAcciones(actionMessage);
-};
+    const registros = JSON.parse(localStorage.getItem('registroAcciones')) || [];
+    registros.push(registro);
+    localStorage.setItem('registroAcciones', JSON.stringify(registros));
 
-// vamos a mostrar el regisro de acciones de cada persona que se logea. para que sepa que accion realizo
-//idea a futuro es que se pueda ver en el registro la modificacion lo mas especifica posible. pude sacar algunas ideas de internet
+    mostrarRegistroAcciones();
+  };
 
-const mostrarRegistroAcciones = () => {
-  const actionLog = document.getElementById('actionLog');
-  actionLog.innerHTML = ''; 
-
-  const registros = JSON.parse(localStorage.getItem('registroAcciones')) || [];
-
-  let currentUser = '';
-  registros.forEach(registro => {
-    const parts = registro.split(':');
-    const username = parts[0].trim(); 
-    const action = parts[1].trim(); 
-
-    if (currentUser !== username) {
-      const userHeader = document.createElement('p');
-      userHeader.textContent = `Usuario ${username}:`;
-      actionLog.appendChild(userHeader);
-      currentUser = username;
-    }
-
-    const registroItem = document.createElement('p');
-    registroItem.textContent = `  - ${action}`;
-    actionLog.appendChild(registroItem);
-  });
-};
-
-const actualizarRegistroAcciones = (message) => {
-  const loggedInUser = sessionStorage.getItem('loggedInUser');
-  const timestamp = new Date().toLocaleString();
-  const registro = `${loggedInUser}: ${message}`;
-
-  const registros = JSON.parse(localStorage.getItem('registroAcciones')) || [];
-  registros.push(registro);
-  localStorage.setItem('registroAcciones', JSON.stringify(registros));
-
-  mostrarRegistroAcciones(); 
-};
-
-document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
   const logoutButton = document.getElementById('logoutButton');
   const vehiculosSection = document.getElementById('vehiculosSection');
@@ -180,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.style.display = 'none';
     logoutButton.style.display = 'block';
     vehiculosSection.style.display = 'block';
-    cargarAutosDesdeLocalStorage();
+    // cargarAutosDesdeLocalStorage(); // No necesitas cargar desde localStorage aquí, ya se carga desde el JSON
   } else {
     loginForm.style.display = 'block';
     logoutButton.style.display = 'none';
@@ -199,14 +228,14 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-// Supongamos que las credenciales son correctas dejamos ingresar a l formulario
+
     sessionStorage.setItem('isLoggedIn', 'true');
     sessionStorage.setItem('loggedInUser', email);
 
     loginForm.style.display = 'none';
     logoutButton.style.display = 'block';
     vehiculosSection.style.display = 'block';
-    cargarAutosDesdeLocalStorage();
+    // cargarAutosDesdeLocalStorage(); // No necesitas cargar desde localStorage aquí, ya se carga desde el JSON
   });
 
   addVehicleForm.addEventListener('submit', (event) => {
@@ -214,13 +243,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
 
     if (isLoggedIn === 'true') {
-      const marca = document.getElementById('marca').value;
-      const modelo = document.getElementById('modelo').value;
+      const marca = document.getElementById('marca').value.toLowerCase();
+      const modelo = document.getElementById('modelo').value.toLowerCase();
       const stock = parseInt(document.getElementById('stock').value);
       const precio = parseFloat(document.getElementById('precio').value);
 
-      agregarVehiculo(marca, modelo, stock, precio);
-      addVehicleForm.reset();
+      const vehiculoExistente = autos.find((auto) =>
+        auto.marca.toLowerCase() === marca && auto.modelo.toLowerCase() === modelo
+      );
+
+      if (vehiculoExistente) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'El vehículo ya existe en el listado.',
+        });
+      } else {
+        agregarVehiculo(marca, modelo, stock, precio);
+        addVehicleForm.reset();
+        Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: '¡El vehículo ha sido agregado correctamente!',
+          showConfirmButton: false,
+          timer: 1600
+        });
+      }
     } else {
       console.log('Usuario no autorizado. Por favor, inicie sesión.');
     }

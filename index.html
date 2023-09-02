@@ -30,9 +30,13 @@
     <h1>Gestión de Vehículos</h1>
     <form id="addVehicleForm">
       <label for="marca">Marca:</label>
-      <select id="marca" required></select>
+      <select id="marca" required>
+        <option value="" disabled selected>Seleccione la marca</option>
+      </select>
       <label for="modelo">Modelo:</label>
-      <select id="modelo" required></select> 
+      <select id="modelo" required>
+        <option value="" disabled selected>Seleccione el modelo</option>
+      </select> 
       <label for="stock">Stock:</label>
       <input type="number" id="stock" required>
       <label for="precio">Precio:</label>

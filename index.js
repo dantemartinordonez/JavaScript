@@ -1,34 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
+  
+  const marcasSelect = document.getElementById('marca');
+  const modelosSelect = document.getElementById('modelo');
 
-
-  const obtenerMarcasYModelos = () => {
-    const vehiculosGuardados = JSON.parse(localStorage.getItem('productos')) || [];
-
-    const marcasSet = new Set();
-    const modelosSet = new Set();
-
-    vehiculosGuardados.forEach((vehiculo) => {
-      marcasSet.add(vehiculo.marca.toLowerCase());
-      modelosSet.add(vehiculo.modelo.toLowerCase());
-    });
-
-    const marcas = Array.from(marcasSet);
-    const modelos = Array.from(modelosSet);
-
-    return { marcas, modelos };
-  };
+  marcasSelect.disabled = true;
+  modelosSelect.disabled = true;
 
   const cargarMarcasYModelosDesdeJSON = () => {
     fetch("./db/autos.json")
       .then((resp) => resp.json())
       .then((data) => {
-        const marcasSelect = document.getElementById('marca');
-        const modelosSelect = document.getElementById('modelo');
-  
 
         marcasSelect.innerHTML = '';
         modelosSelect.innerHTML = '';
-  
+
+        const optionSeleccioneMarca = document.createElement('option');
+        optionSeleccioneMarca.value = '';
+        optionSeleccioneMarca.textContent = 'Seleccione la marca';
+        marcasSelect.appendChild(optionSeleccioneMarca);
+
+        const optionSeleccioneModelo = document.createElement('option');
+        optionSeleccioneModelo.value = '';
+        optionSeleccioneModelo.textContent = 'Seleccione el modelo';
+        modelosSelect.appendChild(optionSeleccioneModelo);
 
         data.marcas.forEach((marca) => {
           const option = document.createElement('option');
@@ -36,34 +30,38 @@ document.addEventListener('DOMContentLoaded', () => {
           option.textContent = marca.nombre;
           marcasSelect.appendChild(option);
         });
-  
 
-        data.marcas[0].modelos.forEach((modelo) => {
-          const option = document.createElement('option');
-          option.value = modelo;
-          option.textContent = modelo;
-          modelosSelect.appendChild(option);
-        });
-  
+        marcasSelect.disabled = false;
+        modelosSelect.disabled = false;
 
         marcasSelect.addEventListener('change', () => {
           const selectedMarca = marcasSelect.value;
-          const selectedMarcaData = data.marcas.find((marca) => marca.nombre === selectedMarca);
-  
+
 
           modelosSelect.innerHTML = '';
-          selectedMarcaData.modelos.forEach((modelo) => {
-            const option = document.createElement('option');
-            option.value = modelo;
-            option.textContent = modelo;
-            modelosSelect.appendChild(option);
-          });
+
+          if (selectedMarca === '') {
+
+            modelosSelect.disabled = true;
+          } else {
+
+            const selectedMarcaData = data.marcas.find((marca) => marca.nombre === selectedMarca);
+            selectedMarcaData.modelos.forEach((modelo) => {
+              const option = document.createElement('option');
+              option.value = modelo;
+              option.textContent = modelo;
+              modelosSelect.appendChild(option);
+            });
+
+            modelosSelect.disabled = false;
+          }
         });
       })
       .catch((error) => {
         console.error('Error al cargar datos desde el archivo JSON:', error);
       });
   };
+
 
   const marcasImagenes = {
     peugeot: 'peugeot.jfif',
@@ -194,15 +192,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const mostrarRegistroAcciones = () => {
     const actionLogTableBody = document.getElementById('actionLogTableBody');
     actionLogTableBody.innerHTML = '';
-
+  
     const registros = JSON.parse(localStorage.getItem('registroAcciones')) || [];
-
+  
     let currentUser = null;
     registros.forEach(registro => {
       const parts = registro.split(':');
       const username = parts[0].trim();
       const action = parts.slice(1).join(':').trim();
-
+  
       if (currentUser !== username) {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -214,23 +212,28 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </td>
         `;
-
+  
         actionLogTableBody.appendChild(row);
         currentUser = username;
       }
-
+  
       const userRow = actionLogTableBody.lastElementChild;
       const userActionsList = userRow.querySelector('.user-actions');
       const userDetails = userRow.querySelector('.details');
       const toggleDetailsBtn = userRow.querySelector('.toggle-details-btn');
-
+  
       const actionItem = document.createElement('li');
       actionItem.textContent = action;
       userActionsList.appendChild(actionItem);
+    });
+  
 
-      toggleDetailsBtn.addEventListener('click', () => {
+    const toggleDetailsButtons = document.querySelectorAll('.toggle-details-btn');
+    toggleDetailsButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const userDetails = button.nextElementSibling;
         userDetails.classList.toggle('hidden');
-        toggleDetailsBtn.textContent = userDetails.classList.contains('hidden') ? 'Mostrar detalles' : 'Ocultar detalles';
+        button.textContent = userDetails.classList.contains('hidden') ? 'Mostrar detalles' : 'Ocultar detalles';
       });
     });
   };

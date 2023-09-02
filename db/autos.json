@@ -1,20 +1,64 @@
-[
-  {
-    "marca": "Peugeot",
-    "modelo": "208",
-    "stock": 5,
-    "precio": 9500000
-  },
-  {
-    "marca": "Fiat",
-    "modelo": "Cronos",
-    "stock": 3,
-    "precio": 8200000
-  },
-  {
-    "marca": "Ford",
-    "modelo": "Focus",
-    "stock": 1,
-    "precio": 12000000
-  }
-]
+{
+  "marcas": [
+    {
+      "nombre": "Peugeot",
+      "modelos": ["208", "207", "206", "308", "2008", "3008", "Partner", "Otro"]
+    },
+    {
+      "nombre": "Toyota",
+      "modelos": ["Corolla", "Hilux", "RAV4", "Yaris", "Otro"]
+    },
+    {
+      "nombre": "Fiat",
+      "modelos": ["500", "Cronos", "Argo", "Palio", "Toro", "Punto", "Pulse", "Uno", "Otro"]
+    },
+    {
+      "nombre": "Citroen",
+      "modelos": ["C3", "C4", "Berlingo", "DS3", "DS4", "Cactus", "Otro"]
+    },
+    {
+      "nombre": "Ford",
+      "modelos": ["Fiesta", "Focus", "Mustang", "Explorer", "Otro"]
+    },
+    {
+      "nombre": "Volkswagen",
+      "modelos": ["Golf", "Passat", "Vento", "Polo", "Otro"]
+    },
+    {
+      "nombre": "Renault",
+      "modelos": ["Clio", "Duster", "Sandero", "Kwid", "Otro"]
+    },
+    {
+      "nombre": "Honda",
+      "modelos": ["Civic", "Accord", "CR-V", "Fit", "HR-V", "Otro"]
+    },
+    {
+      "nombre": "Hyundai",
+      "modelos": ["Elantra", "Sonata", "Tucson", "Otro"]
+    },
+    {
+      "nombre": "Chevrolet",
+      "modelos": ["Cruze", "Malibu", "Camaro", "Onix", "Otro"]
+    },
+    {
+      "nombre": "Nissan",
+      "modelos": ["Altima", "Sentra", "Frontier", "Otro"]
+    },
+    {
+      "nombre": "BMW",
+      "modelos": ["3 Series", "5 Series", "X3", "X5", "7 Series", "M3", "i3", "Z4", "Otro"]
+    },
+    {
+      "nombre": "Mercedes-Benz",
+      "modelos": ["C-Class", "E-Class", "GLC", "GLE", "S-Class", "A-Class", "CLA", "GLA", "Otro"]
+    },
+    {
+      "nombre": "Audi",
+      "modelos": ["A3", "A4", "Q5", "Q7", "A6", "TT", "Q3", "A8", "Otro"]
+    },
+    {
+      "nombre": "Subaru",
+      "modelos": ["Outback", "Impreza", "Forester", "Crosstrek", "Legacy", "Otro"]
+    }
+  ]
+}

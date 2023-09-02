@@ -30,9 +30,9 @@
     <h1>Gestión de Vehículos</h1>
     <form id="addVehicleForm">
       <label for="marca">Marca:</label>
-      <input type="text" id="marca" required>
+      <select id="marca" required></select>
       <label for="modelo">Modelo:</label>
-      <input type="text" id="modelo" required>
+      <select id="modelo" required></select> 
       <label for="stock">Stock:</label>
       <input type="number" id="stock" required>
       <label for="precio">Precio:</label>
@@ -42,9 +42,9 @@
     <div id="vehiculosContenedor">
     </div>
     <br>
-  
+    <hr>
     <table>
-      <h4>DATOS CARGADOS POR EL USUARIO</h4>
+      <H4>HISTORIAL DE ACCIONES</H4>
       <thead>
         <tr>
           <th>Usuario</th>
@@ -55,6 +55,7 @@
       </tbody>
     </table>
   </main>
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="./index.js"></script>
 </body>

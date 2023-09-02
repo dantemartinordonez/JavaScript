@@ -1,37 +1,68 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  let autos = []; // Lista para almacenar los vehículos
+document.addEventListener('DOMContentLoaded', () => {
 
-  const cargarDatosDesdeJSON = async () => {
-    try {
-      const response = await fetch("./db/autos.json");
-      const data = await response.json();
-      autos = data; // Cargamos los datos del JSON
-      mostrarVehiculos();
-    } catch (error) {
-      console.error('Error al cargar datos desde JSON:', error);
-    }
+
+  const obtenerMarcasYModelos = () => {
+    const vehiculosGuardados = JSON.parse(localStorage.getItem('productos')) || [];
+
+    const marcasSet = new Set();
+    const modelosSet = new Set();
+
+    vehiculosGuardados.forEach((vehiculo) => {
+      marcasSet.add(vehiculo.marca.toLowerCase());
+      modelosSet.add(vehiculo.modelo.toLowerCase());
+    });
+
+    const marcas = Array.from(marcasSet);
+    const modelos = Array.from(modelosSet);
+
+    return { marcas, modelos };
   };
 
-  cargarDatosDesdeJSON(); // Cargamos los datos desde el JSON al iniciar
+  const cargarMarcasYModelosDesdeJSON = () => {
+    fetch("./db/autos.json")
+      .then((resp) => resp.json())
+      .then((data) => {
+        const marcasSelect = document.getElementById('marca');
+        const modelosSelect = document.getElementById('modelo');
+  
 
-  const guardarDatosEnJSON = async () => {
-    try {
-      const response = await fetch("./db/autos.json", {
-        method: 'PUT', // Usar PUT para actualizar el JSON
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(autos), // Guardamos los datos actualizados en el JSON
+        marcasSelect.innerHTML = '';
+        modelosSelect.innerHTML = '';
+  
+
+        data.marcas.forEach((marca) => {
+          const option = document.createElement('option');
+          option.value = marca.nombre;
+          option.textContent = marca.nombre;
+          marcasSelect.appendChild(option);
+        });
+  
+
+        data.marcas[0].modelos.forEach((modelo) => {
+          const option = document.createElement('option');
+          option.value = modelo;
+          option.textContent = modelo;
+          modelosSelect.appendChild(option);
+        });
+  
+
+        marcasSelect.addEventListener('change', () => {
+          const selectedMarca = marcasSelect.value;
+          const selectedMarcaData = data.marcas.find((marca) => marca.nombre === selectedMarca);
+  
+
+          modelosSelect.innerHTML = '';
+          selectedMarcaData.modelos.forEach((modelo) => {
+            const option = document.createElement('option');
+            option.value = modelo;
+            option.textContent = modelo;
+            modelosSelect.appendChild(option);
+          });
+        });
+      })
+      .catch((error) => {
+        console.error('Error al cargar datos desde el archivo JSON:', error);
       });
-
-      if (response.ok) {
-        console.log('Datos guardados en el JSON exitosamente.');
-      } else {
-        console.error('Error al guardar datos en el JSON.');
-      }
-    } catch (error) {
-      console.error('Error al guardar datos en el JSON:', error);
-    }
   };
 
   const marcasImagenes = {
@@ -41,6 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     citroen: 'citroen.jfif',
     ford: 'ford.jfif',
     volkswagen: 'volkswagen.jfif',
+    renault: 'reanult.jpeg',
+    toyota: 'toyota.jpeg',
   };
 
   class Vehiculo {
@@ -51,6 +84,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       this.precio = precio;
     }
   }
+
+  const autos = [];
 
   const mostrarVehiculos = () => {
     const vehiculosContenedor = document.getElementById('vehiculosContenedor');
@@ -83,13 +118,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   };
 
+  const guardarAutosEnLocalStorage = () => {
+    localStorage.setItem('autos', JSON.stringify(autos));
+  };
+
+  const cargarAutosDesdeLocalStorage = () => {
+    const autosGuardados = JSON.parse(localStorage.getItem('autos'));
+    if (autosGuardados) {
+      autos.length = 0;
+      autosGuardados.forEach(auto => {
+        autos.push(new Vehiculo(auto.marca, auto.modelo, auto.stock, auto.precio));
+      });
+      mostrarVehiculos();
+    }
+  };
+
   const agregarVehiculo = (marca, modelo, stock, precio) => {
     const nuevoVehiculo = new Vehiculo(marca, modelo, stock, precio);
     autos.push(nuevoVehiculo);
-    guardarDatosEnJSON(); // Guardar datos actualizados en el JSON
+    guardarAutosEnLocalStorage();
     mostrarVehiculos();
 
-    const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+    const loggedInUser = sessionStorage.getItem('loggedInUser');
     const actionMessage = `Usuario ${loggedInUser} agregó un vehículo: ${marca} ${modelo}`;
     actualizarRegistroAcciones(actionMessage);
   };
@@ -99,13 +149,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editarForm = document.createElement('div');
     editarForm.className = 'editar-form';
     editarForm.innerHTML = `
-      <label for="nuevoPrecio">Nuevo Precio:</label>
-      <input type="number" id="nuevoPrecio" step="0.01" value="${vehiculo.precio}">
-      <label for="nuevoStock">Nuevo Stock:</label>
-      <input type="number" id="nuevoStock" value="${vehiculo.stock}">
-      <button class="guardar-btn">Guardar</button>
-      <button class="cancelar-btn">Cancelar</button>
-    `;
+    <label for="nuevoPrecio">Nuevo Precio:</label>
+    <input type="number" id="nuevoPrecio" step="0.01" value="${vehiculo.precio}">
+    <label for="nuevoStock">Nuevo Stock:</label>
+    <input type="number" id="nuevoStock" value="${vehiculo.stock}">
+    <button class="guardar-btn">Guardar</button>
+    <button class="cancelar-btn">Cancelar</button> <!-- Corrección aquí -->
+  `;
 
     editarForm.querySelector('.guardar-btn').addEventListener('click', () => {
       const nuevoPrecio = parseFloat(editarForm.querySelector('#nuevoPrecio').value);
@@ -114,10 +164,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!isNaN(nuevoPrecio) && !isNaN(nuevoStock)) {
         vehiculo.precio = nuevoPrecio;
         vehiculo.stock = nuevoStock;
-        guardarDatosEnJSON(); // Guardar datos actualizados en el JSON
+        guardarAutosEnLocalStorage();
         mostrarVehiculos();
 
-        const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+        const loggedInUser = sessionStorage.getItem('loggedInUser');
         const actionMessage = `Usuario ${loggedInUser} editó un vehículo: ${vehiculo.marca} ${vehiculo.modelo}`;
         actualizarRegistroAcciones(actionMessage);
       }
@@ -133,10 +183,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const eliminarVehiculo = (index) => {
     autos.splice(index, 1);
-    guardarDatosEnJSON(); // Guardar datos actualizados en el JSON
+    guardarAutosEnLocalStorage();
     mostrarVehiculos();
 
-    const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+    const loggedInUser = sessionStorage.getItem('loggedInUser');
     const actionMessage = `Usuario ${loggedInUser} eliminó un vehículo.`;
     actualizarRegistroAcciones(actionMessage);
   };
@@ -186,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const actualizarRegistroAcciones = (message) => {
-    const loggedInUser = sessionStorage.getItem('loggedInUser') || 'Usuario Anónimo';
+    const loggedInUser = sessionStorage.getItem('loggedInUser');
     const timestamp = new Date().toLocaleString();
     const registro = `${loggedInUser}: ${message}`;
 
@@ -209,7 +259,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     loginForm.style.display = 'none';
     logoutButton.style.display = 'block';
     vehiculosSection.style.display = 'block';
-    // cargarAutosDesdeLocalStorage(); // No necesitas cargar desde localStorage aquí, ya se carga desde el JSON
+    cargarAutosDesdeLocalStorage();
+    cargarMarcasYModelosDesdeJSON();
   } else {
     loginForm.style.display = 'block';
     logoutButton.style.display = 'none';
@@ -235,7 +286,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     loginForm.style.display = 'none';
     logoutButton.style.display = 'block';
     vehiculosSection.style.display = 'block';
-    // cargarAutosDesdeLocalStorage(); // No necesitas cargar desde localStorage aquí, ya se carga desde el JSON
+    cargarAutosDesdeLocalStorage();
+    cargarMarcasYModelosDesdeJSON();
   });
 
   addVehicleForm.addEventListener('submit', (event) => {
@@ -248,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const stock = parseInt(document.getElementById('stock').value);
       const precio = parseFloat(document.getElementById('precio').value);
 
-      const vehiculoExistente = autos.find((auto) =>
+      const vehiculoExistente = autos.find((auto) => 
         auto.marca.toLowerCase() === marca && auto.modelo.toLowerCase() === modelo
       );
 
